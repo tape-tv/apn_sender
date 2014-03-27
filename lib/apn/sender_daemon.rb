@@ -42,6 +42,9 @@ module APN
         opts.on('-d', '--delay=D', "Delay between rounds of work (seconds)") do |d|
           @options[:delay] = d
         end
+        opts.on('-p', '--pidfile=PIDFILE', "Full path to pidfile") do |pidfile|
+          @options[:pidfile] = pidfile
+        end
       end
 
       # If no arguments, give help screen
@@ -51,7 +54,7 @@ module APN
     def daemonize
       @options[:worker_count].times do |worker_index|
         process_name = @options[:worker_count] == 1 ? "apn_sender" : "apn_sender.#{worker_index}"
-        pids_dir = defined?(Rails) ? "#{::RAILS_ROOT}/tmp/pids" : "tmp/pids"
+        pids_dir = !@options[:pidfile].nil? ? @options[:pidfile] : ( defined?(Rails) ? "#{::RAILS_ROOT}/tmp/pids" : "tmp/pids" )
         Daemons.run_proc(process_name, :dir => pids_dir, :dir_mode => :normal, :ARGV => @args) do |*args|
           run(process_name)
         end
