@@ -67,6 +67,13 @@ module APN
       APN.root = @options[:cert_root]
       APN.certificate_name = @options[:certificate_name]
 
+      apn_sender_logger = Logger.new(File.join(Rails.root, 'log', "#{worker_name}.log"))
+      apn_sender_logger.level = Logger::INFO
+      Rails.logger = apn_sender_logger
+      ActiveRecord::Base.logger = apn_sender_logger
+      APN.logger = apn_sender_logger
+      Resque.logger = apn_sender_logger
+
       worker = ::Resque::Worker.new(APN::Jobs::QUEUE_NAME)
       worker.work(@options[:delay])
     rescue => e
